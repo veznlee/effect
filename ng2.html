@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <script src='./angular.js'></script>
+</head>
+<body ng-app='PonyDeli' ng-controller='foodCtrl'>
+    <span piece-of-food='piece'></span>
+    <script>
+        var deli = angular.module('PonyDeli', []);
+
+        deli.controller('foodCtrl', function ($scope) {
+            $scope.piece = 'Fish & Chips';
+        });
+
+        deli.directive('pieceOfFood', function () {
+            return {
+                template: '{{pieceOfFood}}',
+                link: function (scope, element, attrs) {
+                    //在指令的链接函数里，我们可以获得元素上的属性集合。这个集合有一个特殊的方法，叫$observe(), 当一个属性变化时可以触发一个回调。
+                    attrs.$observe('pieceOfFood', function (value) {
+                        scope.pieceOfFood = scope.$eval(value);
+                    });
+                }
+            };
+        });
+    </script>
+</body>
+</html>

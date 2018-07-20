@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<style>
+    body {
+        background:#333;
+    }
+    canvas {
+        background:#fff;
+    }
+    #preview,.img,img {
+        width:100px;
+        height:100px;
+    }
+    #preview {
+        border:1px solid #000;
+    }
+</style>
+<canvas width="400" height="400" id="canvas">
+    <span>亲，您的浏览器不支持canvas，换个浏览器试试吧！</span>
+</canvas>
+<div id="preview"></div>
+<input type="file" id="file">
+<script>
+    (function () {
+        var canvas = document.getElementById("canvas");
+        var ctx = canvas.getContext("2d");
+
+        function imgsrc(srcobj) {
+            aImg = new Image();
+            aImg.src = srcobj;
+            aImg.onload = function () {
+                draw(this);
+            };
+        }
+
+        function draw(obj) {
+            ctx.drawImage(obj, 0, 0, 400, 400);
+            //获取图像数据
+            var oImg = ctx.getImageData(0, 0, 400, 400);
+            console.log(oImg);
+
+            // 反转颜色
+            // for (var i = 0; i < imgData.data.length; i += 4) {
+            //     imgData.data[i] = 255 - imgData.data[i];
+            //     imgData.data[i + 1] = 255 - imgData.data[i + 1];
+            //     imgData.data[i + 2] = 255 - imgData.data[i + 2];
+            //     imgData.data[i + 3] = 255;
+            // }
+            // ctx.putImageData(imgData, 0, 0);
+
+            var w = oImg.width;
+            var h = oImg.height;
+            // 1. 以指定的尺寸（以像素计）创建新的 ImageData 对象：
+            // var imgData = context.createImageData(width, height);
+            // 2. 创建与指定的另一个 ImageData 对象尺寸相同的新 ImageData 对象（不会复制图像数据）：
+            // var imgData = context.createImageData(imageData);
+
+
+            //以下这部分相当于从原有的像素中随机选择之前像素的一半像素，其他的用白色填充
+            var newImg = ctx.createImageData(oImg);
+            // var newImg = oImg.data;
+            var arr = randomNum(w * h, w * h / 2);
+            for (var i = 0; i < arr.length; i++) {
+                newImg.data[4 * arr[i]] = oImg.data[4 * arr[i]];
+                newImg.data[4 * arr[i] + 1] = oImg.data[4 * arr[i] + 1];
+                newImg.data[4 * arr[i] + 2] = oImg.data[4 * arr[i] + 2];
+                newImg.data[4 * arr[i] + 3] = oImg.data[4 * arr[i] + 3];
+            }
+
+
+
+            ctx.putImageData(newImg, 0, 0);
+            console.log('OK');
+        }
+
+        //某区域的部分随机数
+        function randomNum(iAll, iNow) {
+            var arr = [];
+            var newArr = [];
+            for (var i = 1; i <= iAll; i++) {
+                arr.push(i);
+            }
+            for (var i = 0; i < iNow; i++) {
+                newArr.push(arr.splice(Math.random() * (arr.length), 1));
+            }
+            return newArr;
+        }
+        //console.log(randomNum(400, 200));//返回一个最大值为400的长度为200的数组
+
+        var fileobj = document.getElementById('file');
+        fileobj.onchange = function () {
+            preview(this);
+        };
+
+        //上传图像加载显示
+        function preview(file) {
+            var prevDiv = document.getElementById('preview');
+            if (file.files[0]) //file.files &&
+            {
+                var reader = new FileReader(); //定义FileReader文件API用于读取文件
+                reader.onload = function (evt) { //文件读取成功时触发
+                    prevDiv.innerHTML = '<img src="' + evt.target.result + '" />';
+                    imgsrc(evt.target.result);
+                };
+                reader.readAsDataURL(file.files[0]); //四模式之一以URL方式读取文件
+            } else {
+                prevDiv.innerHTML = '<div class="img" style="filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(sizingMethod=scale,src=\'' + file.value + '\'"></div>';
+            }
+        }
+    })();
+</script>
+
+</html>

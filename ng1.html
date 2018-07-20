@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <script src='./angular.js'></script>
+</head>
+<body ng-app='PonyDeli' ng-controller='foodCtrl'>
+    <p note='"You just bought some " + type'></p>
+    <script>
+        var deli = angular.module('PonyDeli', []);
+
+        deli.controller('foodCtrl', function ($scope) {
+            $scope.type = 'Fish & Chips';
+        });
+
+        // deli.directive('note', function () {
+        //     return {
+        //         template: '{{note()}}',//You just bought some Fish & Chips
+        //         scope: {
+        //             note: '&'//使用 & 提供一个 表达式解析函数 ，他的上下文是父级作用域。
+        //         }
+        //     };
+        // });
+
+        deli.directive('note', function ($parse) {
+            return {
+                template: '{{note()}}',
+                scope: {},
+                link: function (scope, element, attrs) {
+                    var parentGet = $parse(attrs.note);
+
+                    scope.note = function (locals) {
+                        return parentGet(scope.$parent, locals);
+                    };
+                }
+            };
+        });
+
+        var injector = angular.injector();
+        alert(injector.has("$provide"));//false
+        alert(injector.has("$injector"));//true
+
+
+        // 创建myModule模块、注册服务
+        var myModule = angular.module('myModule', []);
+        myModule.service('myService', function () {
+            this.my = 0;
+        });
+
+        // 创建herModule模块、注册服务
+        var herModule = angular.module('herModule', []);
+        herModule.service('herService', function () {
+            this.her = 1;
+        });
+
+        // 加载了2个模块中的服务
+        var injector = angular.injector(["myModule", "herModule"]);
+        alert(injector.get("myService").my);
+        alert(injector.get("herService").her);
+    </script>
+</body>
+</html>
